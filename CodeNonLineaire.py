@@ -12,13 +12,11 @@ cp_vin = 3963
 h=0.174 #hauteur bouteille en m
 d=0.076 #diamètre bouteill en m
 r_eau = d/2
-
-rho_ethanol = 789
 V=np.pi*r_eau**2*h # (d/2) = r_vin => remplacé partout
 S_B_i = 2*np.pi*r_eau*h
 S_g = S_B_i
-rho_v = rho_ethanol*0.14+1000*(1-0.14)
-Tvin = 11 # Température initiale du vin
+rho_v = 1000
+Teau = 11 # Température initiale du vin
 
 service = 1.5*3600.0 #Durée du calcul
 
@@ -132,7 +130,7 @@ Cr = 0.5/(dr*Vr) + 1.0/dr**2
 #def c(R):
 
 Tinit = T0 * np.ones(Nx) # Récupérer la température initiale linéaire
-Tinit[0] = Tvin          # Idem
+Tinit[0] = Teau          # Idem
 
 def FNonLin(Y,t):
     Y = np.array(Y) # Sécurité
@@ -164,7 +162,7 @@ ax_T.set_title("Températures")
 ax_T.set_xlabel("Instant t [minutes]")
 # Température du vin
 
-ax_T.plot(tmn_NL,soluNonLin[:,0],label='T° Vin Linéaire')
+ax_T.plot(tmn_NL,soluNonLin[:,0],label='T° Eau Linéaire')
 
 plt.show()
 
