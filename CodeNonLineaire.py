@@ -20,7 +20,7 @@ S_g = S_B_i
 rho_v = rho_ethanol*0.14+1000*(1-0.14)
 Tvin = 11 # Température initiale du vin
 
-service = 6*3600.0 #Durée du calcul
+service = 1.5*3600.0 #Durée du calcul
 
 # la résistance thermique équivalente est en [m]/[W/K/m] = K/[W/m²]
 # (température divisée par densité surfacique de flux)
@@ -167,3 +167,5 @@ ax_T.set_xlabel("Instant t [minutes]")
 ax_T.plot(tmn_NL,soluNonLin[:,0],label='T° Vin Linéaire')
 
 plt.show()
+
+print("Temp eau après 1h30 : ",soluNonLin[-1,0])
