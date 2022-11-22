@@ -18,6 +18,8 @@ rho_l_r = 770.0 # phase liquide en kg/m^3
 # températures aux frontières
 T_g, T_d = 10.0, 25.0 # en °C
 
+cp_MCP = 2000
+
 # discrétisation spatiale
 n_x = 25 # nombre d'intervalles
 delta_x = e / n_x # pas de la discrétisation
