@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 
 T0 = 7.0 # Température initiale de la housse.
-Text = 25.0 # Température extérieure
+Text = 35.0 # Température extérieure
 
 eta_vin = 400.0
 eta_air = 4.33
@@ -16,9 +16,9 @@ V=np.pi*r_eau**2*h # (d/2) = r_vin => remplacé partout
 S_B_i = 2*np.pi*r_eau*h
 S_g = S_B_i
 rho_v = 1000
-Teau = 11 # Température initiale du vin
+Teau = 15 # Température initiale du vin
 
-service = 1.5*3600.0 #Durée du calcul
+service = 2*3600.0 #Durée du calcul
 
 # la résistance thermique équivalente est en [m]/[W/K/m] = K/[W/m²]
 # (température divisée par densité surfacique de flux)
@@ -32,7 +32,7 @@ def resist_thq_cyl(r1,r2,k,couche,verbose=False):
     return Req
 
 # Récupérer les valeurs du cas linéaire 
-eta_g = eta_vin #Convection au niveau du vin
+eta_g = eta_vin #Convection au niveau de l'eau
 eta_d = eta_air #Convection au niveau de l'air
 
 #Bouteille
@@ -99,7 +99,7 @@ print(f"Résistance thermique équivalente à droite ~ {1e6*Reqd:.2f} K.mm²/W")
 
 def alpha(T):
     #Modèle non linéaire
-    return k/h_pr_v(T)
+    return k/h_pr_r(T)
 
 #Mise sous forme de problème de Cauchy
 
@@ -127,7 +127,6 @@ gd = eta_eqd/(3*beta+eta_eqd)
 Ar = -0.5/(dr*Vr) + 1.0/dr**2
 b = -2/dr**2
 Cr = 0.5/(dr*Vr) + 1.0/dr**2
-#def c(R):
 
 Tinit = T0 * np.ones(Nx) # Récupérer la température initiale linéaire
 Tinit[0] = Teau          # Idem
@@ -135,7 +134,7 @@ Tinit[0] = Teau          # Idem
 def FNonLin(Y,t):
     Y = np.array(Y) # Sécurité
     Yprime = np.zeros_like(Y)
-    # Première ligne i=0 # Cavité de vin
+    # Première ligne i=0 # Cavité de l'eau
     Tgstar = 4*dg*Y[1] - dg*Y[2] + gg*Y[0] # Formulaire page 4
     Yprime[0] = 1/(rho_v*cp_vin*V)*S_g*eta_eqg*(Tgstar-Y[0])
     # Deuxième ligne i=1 # Premier nœud du MCP
@@ -160,7 +159,7 @@ tmn_NL = Vt/60.0
 ### Températures ###
 ax_T.set_title("Températures")
 ax_T.set_xlabel("Instant t [minutes]")
-# Température du vin
+# Température de l'eau
 
 ax_T.plot(tmn_NL,soluNonLin[:,0],label='T° Eau Linéaire')
 

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 
 T0 = 7.0 # Température initiale de la housse.
-Text = 25.0 # Température extérieure
+Text = 30.0 # Température extérieure
 
 eta_vin = 400.0
 eta_air = 4.33
@@ -12,15 +12,13 @@ cp_vin = 3963
 h=0.174 #hauteur bouteille en m
 d=0.076 #diamètre bouteill en m
 r_eau = d/2
-
-rho_ethanol = 789
 V=np.pi*r_eau**2*h # (d/2) = r_vin => remplacé partout
 S_B_i = 2*np.pi*r_eau*h
 S_g = S_B_i
-rho_v = rho_ethanol*0.14+1000*(1-0.14)
-Tvin = 11 # Température initiale du vin
+rho_v = 1000
+Tvin = 15 # Température initiale du vin
 
-service = 6*3600.0 #Durée du calcul
+service = 2*3600.0 #Durée du calcul
 
 # la résistance thermique équivalente est en [m]/[W/K/m] = K/[W/m²]
 # (température divisée par densité surfacique de flux)
@@ -101,7 +99,7 @@ print(f"Résistance thermique équivalente à droite ~ {1e6*Reqd:.2f} K.mm²/W")
 
 def alpha2(T):
     #Modèle linéaire
-    return k/(rho_s_v*cp_MCP)*np.ones_like(T)
+    return k/(rho_s_r*cp_MCP)*np.ones_like(T)
 
 #Mise sous forme de problème de Cauchy
 
@@ -167,3 +165,5 @@ ax_T.set_xlabel("Instant t [minutes]")
 ax_T.plot(tmn_NL,soluLin[:,0],label='T° Vin Linéaire')
 
 plt.show()
+
+print("Temp eau après 1h30 : ",soluLin[-1,0])
