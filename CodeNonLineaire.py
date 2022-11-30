@@ -16,7 +16,7 @@ V=np.pi*r_eau**2*h # (d/2) = r_vin => remplacé partout
 S_B_i = 2*np.pi*r_eau*h
 S_g = S_B_i
 rho_v = 1000
-Teau = 15 # Température initiale du vin
+Teau = 15 # Température initiale du eau
 
 service = 2*3600.0 #Durée du calcul
 
@@ -78,7 +78,7 @@ T_air = Text # 25.0
 
 #Discrétisation
 
-Nx = 10
+Nx = 5
 e  = (r_MCP - r_plast1)
 dr = e/Nx
 

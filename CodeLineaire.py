@@ -78,7 +78,7 @@ T_air = Text # 25.0
 
 #Discrétisation
 
-Nx = 10
+Nx = 5
 e  = (r_MCP - r_plast1)
 dr = e/Nx
 
