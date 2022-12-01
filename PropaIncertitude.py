@@ -8,7 +8,7 @@ np.random.seed(0)
 
 #Taille des fibres
 moy = 6
-ecart = 0.6
+ecart = 0.125*6
 serie = np.random.normal(moy,ecart,nb_echan)
 
 plt.figure("PDF")
@@ -51,5 +51,4 @@ plt.show()
 LHS = lhsmdu.sample(1,100)
 LHSppf = stats.norm.ppf(LHS,fit_moy_df,fit_ecart_df)
 
-print(LHS)
 print(LHSppf)
