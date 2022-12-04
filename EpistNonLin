@@ -30,7 +30,7 @@ service = 2*3600.0 #Durée du calcul : 2eures
 e_MCP=6 #mm
 
 
-eta_arr = np.linspace(2,10,100)
+eta_arr = np.linspace(4,5,100)
 T_arr = np.zeros(len(eta_arr))
 for i_eta,eta_air in enumerate(eta_arr):
     print(eta_air)

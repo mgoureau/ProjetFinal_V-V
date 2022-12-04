@@ -25,10 +25,10 @@ from scipy.integrate import odeint
 T0 = 7.0 # Température initiale de la housse.
 # La housse étant stockée dans un frigo on considère que toutes ses couches
 # sont à la température initiale T0
-Text = 25.0 # Température extérieure
+Text = 35.0 # Température extérieure
 #Par la suite on impose une temperature notre bouteille de 11°C pour avoir
 # une dégustation optimale  
-Tverre = 11.0 # Créer un paramètre
+Tverre = 15.0 # Créer un paramètre
 ## 1.2 - Couches cylindriques de la bouteille et de la housse
 verre  = CoucheConductriceCylindrique( 1.05, 2500 ,  720,   38e-3,39.5e-3, Tverre)
 revet1 = CoucheConductriceCylindrique(0.192, 1230 , 2176, 39.5e-3,  40e-3, T0)
@@ -78,7 +78,7 @@ vin = Cavite( V, rho_v, cp_vin,[ [coque,"G",S_B_i]] , Tvin)
 # On considère que le temps de service est de 1h soit 3600s
 # Le pas de temps vaut Ts=10s
 # Notre cavité est le vin
-service = 6*3600.0
+service = 2*3600.0
 STL = SystemeThermiqueLineaire(service, 1.0, vin) 
 
 ## 5 - Calcul et visualisation des données
@@ -153,7 +153,7 @@ T_air = Text # 25.0
 
 #Discrétisation
 
-Nx = 20
+Nx = 50
 e  = (mcp.Rmax - mcp.Rmin)
 dr = e/Nx
 
@@ -246,7 +246,8 @@ def FLin(Y,t):
 
 soluLin=odeint(FLin,Tinit,Vt)
 
-soluNonLin=odeint(FNonLin,Tinit,Vt)
+#soluNonLin=odeint(FNonLin,Tinit,Vt)
+SoluNonLin =0
 
 ## 6 - Visualisation des résultats
 plt.figure("Résultats de la simulation",figsize=(16,7))
@@ -263,39 +264,45 @@ for ax in (ax_T,ax_T1) :
 # Température du vin
 T_vin = STL.T_cavites[0]
 ax_T.plot(tmn_lin, T_vin, "-", color=(0,0.5,0.5), linewidth=2.0, \
-          label = "T° vin SysTherLin")
-ax_T.plot(tmn_NL,soluNonLin[:,0],label='T° Vin Non linéaire')
-ax_T.plot(tmn_NL,soluLin[:,0],label='T° Vin Linéaire')
+          label = "T° Eau SysTherLin")
+#ax_T.plot(tmn_NL,soluNonLin[:,0],label='T° Eau Non linéaire')
+ax_T.plot(tmn_NL,soluLin[:,0],label='T° Eau Linéaire')
 
-ax_T1.plot(tmn_lin, T_vin, ":", color=(0,0.5,0.5))
+#ax_T1.plot(tmn_lin, T_vin, ":", color=(0,0.5,0.5))
 # La faire apparaître sur l'autre graphique
 
+Somme=0
+for k in range(len(soluLin[:,0])) :
+    Somme+= (soluLin[k,0]-T_vin[k])**2
+EL2 = (1/len(soluLin)*Somme)**0.5
+
+print(EL2)
 #------------------------------------------------------------------------------------
 
 #Température du revetement1
 
-_,T_revet1,_= coque.T_phi(77.75e-3/2)
-ax_T1.plot(tmn_lin, T_revet1, "-", color="c", linewidth=2.0, label = "T° revet1")
+#_,T_revet1,_= coque.T_phi(77.75e-3/2)
+#ax_T1.plot(tmn_lin, T_revet1, "-", color="c", linewidth=2.0, label = "T° revet1")
 
 #Température du verre 
-_,T_verre,_= coque.T_phi(76.75e-3/2)
-ax_T1.plot(tmn_lin, T_verre, "-", color="g", linewidth=2.0, label = "T° verre")
+#_,T_verre,_= coque.T_phi(76.75e-3/2)
+#ax_T1.plot(tmn_lin, T_verre, "-", color="g", linewidth=2.0, label = "T° verre")
 
 #Température du plast1 
-_,T_plast1,_= coque.T_phi(78.25e-3/2)
-ax_T1.plot(tmn_lin, T_plast1, "-", color="r", linewidth=2.0, label = "T° plast1")
+#_,T_plast1,_= coque.T_phi(78.25e-3/2)
+#ax_T1.plot(tmn_lin, T_plast1, "-", color="r", linewidth=2.0, label = "T° plast1")
 
 #Température du mcp 
-_,T_mcp,_= coque.T_phi(80.75e-3/2)
-ax_T1.plot(tmn_lin, T_mcp, "-", color="b", linewidth=2.0, label = "T° mcp")
+#_,T_mcp,_= coque.T_phi(80.75e-3/2)
+#ax_T1.plot(tmn_lin, T_mcp, "-", color="b", linewidth=2.0, label = "T° mcp")
 
 #Température du plast2 
-_,T_plast2,_= coque.T_phi(83.25e-3/2)
-ax_T1.plot(tmn_lin, T_plast2, "-", color="y", linewidth=2.0, label = "T° plast2")
+#_,T_plast2,_= coque.T_phi(83.25e-3/2)
+#ax_T1.plot(tmn_lin, T_plast2, "-", color="y", linewidth=2.0, label = "T° plast2")
 
 #Température du revetement2 
-_,T_revet2,_= coque.T_phi(89.25/2)
-ax_T1.plot(tmn_lin, T_revet2, "-", color="m", linewidth=2.0, label = "T° revet2")
+#_,T_revet2,_= coque.T_phi(89.25/2)
+#ax_T1.plot(tmn_lin, T_revet2, "-", color="m", linewidth=2.0, label = "T° revet2")
 
 # Finalisation du tracé"
 ax_T.set_ylabel("Températures [°C]")

@@ -48,7 +48,7 @@ plt.show()
 #MonteCarlo/LHS
 #MC = lhsmdu.createRandomStandardUniformMatrix(1,100)
 #MC = stats.norm.ppf(MC,fit_moy_df,fit_ecart_df)
-LHS = lhsmdu.sample(1,100)
+LHS = lhsmdu.sample(1,50)
 LHSppf = stats.norm.ppf(LHS,fit_moy_df,fit_ecart_df)
 
 print(LHSppf)
