@@ -1,20 +1,20 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
-from PropaIncertitude import LHSppf #Valeur de l'épaisseur de MCP
+#from PropaIncertitude import LHSppf #Valeur de l'épaisseur de MCP
 from sklearn import linear_model
 
 T0 = 7.0 # Température initiale de la housse.
 Text = 35.0 # Température extérieure
 
 eta_vin = 400.0
-eta_air = 4.33
+#eta_air = 4.33
 
 cp_vin = 3963
 h=0.174 #hauteur bouteille en m
 d=0.076 #diamètre bouteill en m
 r_eau = d/2
-V=np.pi*r_eau**2*h # (d/2) = r_vin => remplacé partout
+V=np.pi*r_eau**2*h # (d/2)
 S_B_i = 2*np.pi*r_eau*h
 S_g = S_B_i
 rho_v = 1000
@@ -26,12 +26,14 @@ service = 2*3600.0 #Durée du calcul : 2eures
 # (température divisée par densité surfacique de flux)
 # np.log(r2/r1)*(r1+r2)/2 / lambd ~ (r2-r1)/lambd
 
-e_MCP = LHSppf[0]
+#e_MCP = LHSppf[0]
+e_MCP=6 #mm
 
-T_arr = np.zeros(len(e_MCP))
 
-for i_e,e in enumerate(e_MCP):
-    print(e)
+eta_arr = np.linspace(4,5,100)
+T_arr = np.zeros(len(eta_arr))
+for i_eta,eta_air in enumerate(eta_arr):
+    print(eta_air)
 
     def resist_thq_cyl(r1,r2,k,couche,verbose=False):
         Req = (r2-r1)/k
@@ -57,9 +59,9 @@ for i_e,e in enumerate(e_MCP):
     # def des r
     r_neo1   =   40e-3 # 40e-3
     r_plast1 = 40.5e-3 # 40.5e-3
-    r_MCP    = r_plast1 + e*1e-3 # 46.5e-3
-    r_plast2 =   r_plast1 + e*1e-3 + 0.5e-3 # 47e-3
-    r_neo2   = r_plast1 + e*1e-3 + 1e-3 # 47.5e-3
+    r_MCP    = r_plast1 + e_MCP*1e-3 # 46.5e-3
+    r_plast2 =   r_plast1 + e_MCP*1e-3 + 0.5e-3 # 47e-3
+    r_neo2   = r_plast1 + e_MCP*1e-3 + 1e-3 # 47.5e-3
     #Plastique
     lamb_plast = 0.26   # 0.26
     rho_plast  = 1200 # 1200
@@ -69,8 +71,7 @@ for i_e,e in enumerate(e_MCP):
     from Hprime_comED import (h_pr_v, h_pr_r, k, T_l_v, T_r_v, T_l_r, T_r_r, \
                             T_min_r, T_max_r, T_min_v, T_max_v, rho_s_v, \
                             rho_l_v, rho_s_r, rho_l_r, cp_MCP)
-    # Données du RT15 pour le rosé (indice _r)
-    #et du RT18HC pour le vin rouge (indice _v)
+
 
     print(f"*** MCP Non linéaire ***\n")
 
@@ -97,7 +98,7 @@ for i_e,e in enumerate(e_MCP):
     #Récupération de h'
     def alpha(T):
         #Modèle non linéaire
-        return k/(rho_s_r*cp_MCP)*np.ones_like(T)
+        return k/h_pr_r(T)
 
     #Mise sous forme de problème de Cauchy
     Vr = np.linspace(r_plast1, r_MCP, Nx+1)[1:-1]
@@ -128,16 +129,16 @@ for i_e,e in enumerate(e_MCP):
     Tinit = T0 * np.ones(Nx) # Récupérer la température initiale linéaire
     Tinit[0] = Teau          # Idem
 
-    def FLin(Y,t):
+    def FNonLin(Y,t):
         Y = np.array(Y) # Sécurité
         Yprime = np.zeros_like(Y)
-        # Première ligne i=0 # Cavité de vin
+        # Première ligne i=0 # Cavité de l'eau
         Tgstar = 4*dg*Y[1] - dg*Y[2] + gg*Y[0] # Formulaire page 4
         Yprime[0] = 1/(rho_v*cp_vin*V)*S_g*eta_eqg*(Tgstar-Y[0])
         # Deuxième ligne i=1 # Premier nœud du MCP
         Yprime[1] = alpha(Y[1])*(Ar[0]*Tgstar+b*Y[1]+Cr[0]*Y[2])
         #Lignes de i=2 à i=Nx-2
-        for n in range(2,Nx-1):
+        for n in range(2, Nx-1):
             Yprime[n] = alpha(Y[n])*(Ar[n-1]*Y[n-1]+b*Y[n]+Cr[n-1]*Y[n+1])
         #Dernière ligne i=Nx-1
         Tdstar = -dd*Y[-2] + 4*dd*Y[-1] + gd*T_air # Formulaire page 4
@@ -145,54 +146,20 @@ for i_e,e in enumerate(e_MCP):
         return Yprime
 
     # Mémorisation des résultats
-    soluNonLin=odeint(FLin,Tinit,Vt)
+    soluNonLin=odeint(FNonLin,Tinit,Vt)
 
     print("Temp eau après 2h : ",soluNonLin[-1,0])
-    T_arr[i_e] = soluNonLin[-1,0]
+    T_arr[i_eta] = soluNonLin[-1,0]
     
 
 plt.figure("Résultats de la simulation",figsize=(16,7))
-res,cdf=plt.subplot(1,2,1),plt.subplot(1,2,2)
-res.plot(e_MCP,T_arr,".",label="T° eau")
-cdf.hist(T_arr,100,cumulative=True,density=True,histtype='step',label="CDF")
+plt.plot(eta_arr,T_arr,".",label="T° eau")
 
-lm = linear_model.LinearRegression()
-X=e_MCP.reshape(-1, 1)
-lm.fit(X,T_arr)
-res.plot(e_MCP,lm.predict(X),'r',label="Régression linéaire")
+plt.xlabel("h air")
+plt.ylabel("Température eau (°C)")
 
-print("Eq de droite = {}*T+{}".format(lm.coef_[0],lm.intercept_))
 
-#Coefficient de corrélation
-actual = e_MCP
-predict = lm.predict(X)
-corr_matrix = np.corrcoef(actual, predict)
-corr = corr_matrix[0,1]
-R_sq = corr**2
-print("R2 = ",R_sq)
-
-res.text(100,100,"Régression linéaire = {}T+{}, R2 = {}".format(lm.coef_[0],lm.intercept_,R_sq))
-
-res.set_xlabel("Epaisseur MCP (mm)")
-res.set_ylabel("Température eau (°C)")
-cdf.set_xlabel("Epaisseur MCP (mm)")
-cdf.set_ylabel("Température eau (°C)")
-
-res.set_title("Température de l'eau en fonction de l'épaisseur du MCP")
-cdf.set_title("CDF")
-
-#ax_T = plt.subplot(1,1,1)
-#plt.subplots_adjust(left=0.05, right=0.99, bottom=0.06, top=0.94, wspace=0.3)
-# Échelles des instants en minutes
-#tmn_NL = Vt/60.0
-### Températures ###
-#ax_T.set_title("Températures")
-#ax_T.set_xlabel("Instant t [minutes]")
-# Température de l'eau
-
-#ax_T.plot(tmn_NL,soluNonLin[:,0],label='T° Eau Linéaire')
-res.legend()
-cdf.legend()
-
+plt.title("Température de l'eau en fonction du coefficient de convection de l'air")
+plt.legend()
 plt.show()
 

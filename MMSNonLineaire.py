@@ -1,6 +1,23 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
+import sympy as sb
+
+##MMS
+
+t,r=sb.symbols("t,r")
+T0,t0=sb.symbols("T0,t0")
+h,k,e=sb.symbols("h,k,e")
+Eq_MMS=T0*sb.exp(t/t0)*sb.sin(sb.pi*r/e)
+
+MMS=Eq_MMS.diff(t)-k/h*(Eq_MMS.diff(r,2)+(1/r)*Eq_MMS.diff(r))
+
+def f_MMS(r,t,T0,t0,e):
+    return T0 + T0*np.exp(t/t0)*np.sin(np.pi*r/e)
+    
+def f_source(r,t,T0,t0,e,k,h):
+    return (T0*(e**2*h*r*np.sin(np.pi*r/e)-np.pi*k*t0*(e*np.cos(np.pi*r/e)-np.pi*r*np.sin(np.pi*r/e)))*np.exp(t/t0))/(e**2*h*r*t0)
+
 
 T0 = 7.0 # Température initiale de la housse.
 Text = 35.0 # Température extérieure
@@ -16,9 +33,10 @@ V=np.pi*r_eau**2*h # (d/2)
 S_B_i = 2*np.pi*r_eau*h
 S_g = S_B_i
 rho_v = 1000
-Teau = 15 # Température initiale du eau
+Teau = 7 # Température initiale du eau
 
 service = 2*3600.0 #Durée du calcul
+t0 = service
 
 # la résistance thermique équivalente est en [m]/[W/K/m] = K/[W/m²]
 # (température divisée par densité surfacique de flux)
@@ -68,8 +86,7 @@ cp_plast   = 1500  # 1500
 from Hprime_comED import (h_pr_v, h_pr_r, k, T_l_v, T_r_v, T_l_r, T_r_r, \
                           T_min_r, T_max_r, T_min_v, T_max_v, rho_s_v, \
                           rho_l_v, rho_s_r, rho_l_r, cp_MCP)
-# Données du RT15(indice _r)
-#et du RT18HC (indice _v)
+
 
 print(f"*** MCP Non linéaire ***\n")
 
@@ -78,7 +95,7 @@ T_air = Text # 25.0
 
 #Discrétisation
 
-Nx = 5
+Nx = 20
 e  = (r_MCP - r_plast1)
 dr = e/Nx
 
@@ -135,21 +152,27 @@ def FNonLin(Y,t):
     Y = np.array(Y) # Sécurité
     Yprime = np.zeros_like(Y)
     # Première ligne i=0 # Cavité de l'eau
-    Tgstar = 4*dg*Y[1] - dg*Y[2] + gg*Y[0] # Formulaire page 4
-    Yprime[0] = 1/(rho_v*cp_vin*V)*S_g*eta_eqg*(Tgstar-Y[0])
+    #Tgstar = 4*dg*Y[1] - dg*Y[2] + gg*Y[0] # Formulaire page 4
+    #Yprime[0] = 1/(rho_v*cp_vin*V)*S_g*eta_eqg*(Tgstar-Y[0])-f_source(Vr[0],t,T0,t0,e,k,h_pr_r(Y[0]))
     # Deuxième ligne i=1 # Premier nœud du MCP
-    Yprime[1] = alpha(Y[1])*(Ar[0]*Tgstar+b*Y[1]+Cr[0]*Y[2])
+    Yprime[1] = alpha(Y[1])*(Ar[0]*T0+b*Y[1]+Cr[0]*Y[2])-f_source(Vr[1],t,T0,t0,e,k,h_pr_r(Y[1]))
     #Lignes de i=2 à i=Nx-2
-    for n in range(2, Nx-1):
+    for n in range(1, Nx-1):
         Yprime[n] = alpha(Y[n])*(Ar[n-1]*Y[n-1]+b*Y[n]+Cr[n-1]*Y[n+1])
+        #-f_source(Vr[n],t,T0,t0,e,k,h_pr_r(Y[n]))
     #Dernière ligne i=Nx-1
-    Tdstar = -dd*Y[-2] + 4*dd*Y[-1] + gd*T_air # Formulaire page 4
-    Yprime[-1] = alpha(Y[-1])*(Ar[-1]*Y[-2]+b*Y[-1]+Cr[-1]*Tdstar)
+    #Tdstar = -dd*Y[-2] + 4*dd*Y[-1] + gd*T_air # Formulaire page 4
+    Yprime[-1] = alpha(Y[-1])*(Ar[-1]*Y[-2]+b*Y[-1]+Cr[-1]*25)
     return Yprime
 
 # Mémorisation des résultats
 
 soluNonLin=odeint(FNonLin,Tinit,Vt)
+
+SoluMMS = np.zeros((len(Vr),len(Vt)))
+
+for i_t,tMMS in enumerate(Vt) :
+      SoluMMS[:,i_t] = f_MMS(Vr,tMMS,T0,t0,e)
 
 plt.figure("Résultats de la simulation",figsize=(16,7))
 ax_T = plt.subplot(1,1,1)
@@ -162,7 +185,8 @@ ax_T.set_xlabel("Instant t [minutes]")
 # Température de l'eau
 
 ax_T.plot(tmn_NL,soluNonLin[:,0],label='T° Eau Linéaire')
-
+ax_T.plot(tmn_NL,SoluMMS[0,:],label="MMS")
+plt.legend()
 plt.show()
 
 print("Temp eau après 1h30 : ",soluNonLin[-1,0])

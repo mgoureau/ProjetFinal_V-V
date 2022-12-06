@@ -14,13 +14,13 @@ cp_vin = 3963
 h=0.174 #hauteur bouteille en m
 d=0.076 #diamètre bouteill en m
 r_eau = d/2
-V=np.pi*r_eau**2*h # (d/2) = r_vin => remplacé partout
+V=np.pi*r_eau**2*h # (d/2) 
 S_B_i = 2*np.pi*r_eau*h
 S_g = S_B_i
 rho_v = 1000
 Teau = 15 # Température initiale du eau
 
-service = 2*3600.0 #Durée du calcul : 2eures
+service = 2*3600.0 #Durée du calcul : 2heures
 
 # la résistance thermique équivalente est en [m]/[W/K/m] = K/[W/m²]
 # (température divisée par densité surfacique de flux)
@@ -73,8 +73,6 @@ for i_eta,eta_air in enumerate(eta_arr):
         from Hprime_comED import (h_pr_v, h_pr_r, k, T_l_v, T_r_v, T_l_r, T_r_r, \
                                 T_min_r, T_max_r, T_min_v, T_max_v, rho_s_v, \
                                 rho_l_v, rho_s_r, rho_l_r, cp_MCP)
-        # Données du RT15 pour le rosé (indice _r)
-        #et du RT18HC pour le vin rouge (indice _v)
 
         print(f"*** MCP Non linéaire ***\n")
 

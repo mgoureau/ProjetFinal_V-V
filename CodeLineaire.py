@@ -12,11 +12,11 @@ cp_vin = 3963
 h=0.174 #hauteur bouteille en m
 d=0.076 #diamètre bouteill en m
 r_eau = d/2
-V=np.pi*r_eau**2*h # (d/2) = r_vin => remplacé partout
+V=np.pi*r_eau**2*h # (d/2)
 S_B_i = 2*np.pi*r_eau*h
 S_g = S_B_i
 rho_v = 1000
-Tvin = 15 # Température initiale du vin
+Tvin = 15 # Température initiale de l'eau
 
 service = 2*3600.0 #Durée du calcul
 
@@ -32,7 +32,7 @@ def resist_thq_cyl(r1,r2,k,couche,verbose=False):
     return Req
 
 # Récupérer les valeurs du cas linéaire 
-eta_g = eta_vin #Convection au niveau du vin
+eta_g = eta_vin #Convection au niveau de l'eau
 eta_d = eta_air #Convection au niveau de l'air
 
 #Bouteille
@@ -68,8 +68,8 @@ cp_plast   = 1500  # 1500
 from Hprime_comED import (h_pr_v, h_pr_r, k, T_l_v, T_r_v, T_l_r, T_r_r, \
                           T_min_r, T_max_r, T_min_v, T_max_v, rho_s_v, \
                           rho_l_v, rho_s_r, rho_l_r, cp_MCP)
-# Données du RT15 pour le rosé (indice _r)
-#et du RT18HC pour le vin rouge (indice _v)
+# Données du RT15 (indice _r)
+#et du RT18HC (indice _v)
 
 print(f"*** MCP linéaire ***\n")
 
